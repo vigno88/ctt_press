@@ -62,7 +62,7 @@ void ClearPathStepGen::run() {
 
             _flag=false;
 
-            _OutputBits = (uint8_t) PORTB;	//Read the port
+            // _OutputBits = (uint8_t) PORTB;	//Read the port
 
             if(_BurstSteps[0] && _BurstSteps[0]--)	//Assume at least one axis is active, and check/decrement BurstSteps
             {
@@ -285,7 +285,7 @@ void ClearPathStepGen::Start()
 */
 void ClearPathStepGen::Stop()
 {
-_   _isActive = 0;
+   _isActive = 0;
 }
 
 // This is a debugging function

@@ -5,18 +5,16 @@
 
 class LoadCell {
 public:
-    LoadCell(long LOADCELL_OFFSET,long LOADCELL_DIVIDER);
+    LoadCell();
     ~LoadCell();
     void run();
     void tare();
     long getWeight();
-    void setOffset(long offset);
-    void setDivider(long divider);
+    void setScalingFactor(long scalingFactor);
 
 private:
     HX711 *_loadCell = nullptr;
-    long _offset = 0;
-    long _divider = 0;
+    double _scalingFactor = 0.01;
     long _weight = 0;
 
     long _lastTime = 0;

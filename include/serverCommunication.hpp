@@ -15,6 +15,9 @@ public:
 private:
     CttPress* _press;
 
+    elapsedMillis _timeMetrics = 0;
+    unsigned long _samplingDelayMetrics = 1000;
+
     // Get the length of the next package
     uint16_t getLengthPacket();
     // Process the received package

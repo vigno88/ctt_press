@@ -3,11 +3,27 @@
 ServerCommunication::ServerCommunication(CttPress* press) : _press(press) {}
 
 void ServerCommunication::run() {
-     if(Serial1.available()) {
+    if(Serial.available()) {
+        char temp = Serial.read();
+        if(temp == 'u') {
+            _press->motor.MoveUp();
+        }
+        if(temp == 's') {
+            _press->motor.StopMove();
+        }
+        if(temp == 'd') {
+            _press->motor.MoveDown();
+        }
+    }
+    if(Serial1.available()) {
         uint16_t length = getLengthPacket();
         char buffer[length];
         Serial1.readBytes(buffer, length);
         processPacket(buffer, length);
+    }
+    if(_timeMetrics >= _samplingDelayMetrics) {
+        sendMetrics();
+        _timeMetrics = 0;
     }
 }
 
@@ -36,4 +52,10 @@ void ServerCommunication::processCommand(JsonDocument& doc) {
 
 void ServerCommunication::processsParameter(JsonDocument& doc) {
     
+}
+
+void ServerCommunication::sendMetrics() {
+    Serial.printf("T1: %f\n", _press->thermo1.getTemperature());
+    Serial.printf("T2: %f\n\n", _press->thermo2.getTemperature());
+    Serial.printf("Load: %d\n", _press->loadCell.getWeight());
 }

@@ -1,10 +1,8 @@
 #include "loadCell.hpp"
 
-LoadCell::LoadCell(long offset,long divider) : _offset(offset), _divider(divider) {
+LoadCell::LoadCell() {
     _loadCell = new HX711();
     _loadCell->begin(18,19);
-    _loadCell->set_scale(divider);
-    _loadCell->set_offset(offset);
     _lastTime = millis();
 }
 
@@ -36,10 +34,7 @@ long LoadCell::getWeight() {
     return _weight;
 }
 
-void LoadCell::setDivider(long divider) {
-    _divider = divider;
-}
-
-void LoadCell::setOffset(long offset) {
-    _offset = offset;
+void LoadCell::setScalingFactor(long scalingFactor) {
+    _scalingFactor = scalingFactor;
+    _loadCell->set_scale(_scalingFactor);
 }
