@@ -47,6 +47,15 @@ void ServerCommunication::processPacket(char* package, uint16_t length) {
 }
 
 void ServerCommunication::processCommand(JsonDocument& doc) {
+    const char* name = doc["name"];
+    // Motor Command
+    if(strcmp(name, "mDown") == 0) {
+      _press->motor.MoveDown();  
+    } else if(strcmp(name, "mUp") == 0) {
+      _press->motor.MoveUp();
+    } else if(strcmp(name, "mStop") == 0) {
+        _press->motor.StopMove();
+    }
 
 }
 
@@ -55,7 +64,19 @@ void ServerCommunication::processsParameter(JsonDocument& doc) {
 }
 
 void ServerCommunication::sendMetrics() {
-    Serial.printf("T1: %f\n", _press->thermo1.getTemperature());
-    Serial.printf("T2: %f\n\n", _press->thermo2.getTemperature());
-    Serial.printf("Load: %d\n", _press->loadCell.getWeight());
+    StaticJsonDocument<800> doc;
+    doc["type"] = 4;
+    // JsonArray array = doc.createNestedArray("metrics");
+    // JsonObject object;
+    // object["temp1"] = _press->thermo1.getTemperature();
+    // array.add(object);
+    // doc["metrics"][0]["temp1"] = _press->thermo1.getTemperature();
+    // doc["metrics"][1]["temp2"] = _press->thermo2.getTemperature();
+    // doc["metrics"][2]["load"] = _press->loadCell.getWeight();
+
+    char* payload[800];
+    int numBytes = serializeMsgPack(doc, payload, 800);
+    for(int i = 0; i < numBytes; i++) {
+        Serial.print(payload[i]);
+    }
 }
