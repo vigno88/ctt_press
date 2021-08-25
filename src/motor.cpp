@@ -9,9 +9,6 @@ void Motor::sendOneStep() {
     } else if(_state == StateMotor::MOVING_UP) {
         _stepTravelled--;
     }
-
-
-    // _stepCount++;
 }
 
 Motor::Motor(uint8_t step, uint8_t dir, uint8_t enable):  _dirPin(dir), _enablePin(enable) {
@@ -27,10 +24,6 @@ void Motor::run() {
         sendOneStep();
         _timerPulse = 0;
     }
-
-    // if(isSendStepDone()) {
-    //     _state = StateMotor::IDLE;
-    // }
 }
 
 void Motor::sendStepDown(long x) {
@@ -85,23 +78,23 @@ void Motor::MoveUpSlow() {
 
 void Motor::MoveDown() {
     if(_state == StateMotor::IDLE) {
-    // Set the direction
-    Serial.println("Move down");
-    digitalWrite(_dirPin, DIR_DOWN);
-    _state = StateMotor::MOVING_DOWN;
-    _timerPulse = 0;
-    _delayPulse = 5;
+        // Set the direction
+        Serial.println("Move down");
+        digitalWrite(_dirPin, DIR_DOWN);
+        _state = StateMotor::MOVING_DOWN;
+        _timerPulse = 0;
+        _delayPulse = 5;
     }
 }
 
 void Motor::MoveDownSlow() {
     if(_state == StateMotor::IDLE) {
-    // Set the direction
-    Serial.println("Move down");
-    digitalWrite(_dirPin, DIR_DOWN);
-    _state = StateMotor::MOVING_DOWN;
-    _timerPulse = 0;
-    _delayPulse = 75;
+        // Set the direction
+        Serial.println("Move down");
+        digitalWrite(_dirPin, DIR_DOWN);
+        _state = StateMotor::MOVING_DOWN;
+        _timerPulse = 0;
+        _delayPulse = 75;
     }
 }
 

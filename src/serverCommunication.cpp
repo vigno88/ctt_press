@@ -104,7 +104,7 @@ void ServerCommunication::processsParameter(JsonDocument& doc) {
         } else if(strcmp(key, "dTop") == 0) {
             _press->tcBottom.setKd(v);
         } else if(strcmp(key, "hC") == 0) {
-            _press->controller.setDurabilityConstant(v);
+            // _press->controller.setDurabilityConstant(v);
         } else if(strcmp(key, "lcF") == 0) {
             _press->loadCell.setScalingFactor(v);
         }
