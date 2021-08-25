@@ -4,8 +4,14 @@
 #define DIR_UP false
 #define DIR_DOWN true
 
-static bool pulseState = 0;
-static uint8_t stepPin = 0;
+// static bool pulseState = 0;
+// static uint8_t stepPin = 0;
+
+enum StateMotor {
+    IDLE = 0,
+    MOVING_UP,
+    MOVING_DOWN
+};
 
 class Motor {
 public:
@@ -16,22 +22,42 @@ public:
     void MoveDown();
     // Stop the motor from moving
     void StopMove();
+    void MoveUpSlow();
+    void MoveDownSlow();
+
     void setSpeedMovement(uint16_t speed);
-    // void sendOneStep();
+    void sendOneStep();
     void run();
+
+    double getDistanceTravelled();
+    void tareDistance();
+
+
+    void sendStepDown(long x);
+    void sendSingleStepDown();
+    void sendSingleStepUp();
 private:
-    // uint8_t _stepPin = 0;
+    uint8_t _stepPin = 0;
     uint8_t _dirPin = 0;
     uint8_t _enablePin = 0;
 
     // speedMovement is the number of step/second
     uint16_t _speedMovement = 200;
-    bool _isMoving = false;
-    // bool _pulseState = false;
+    StateMotor _state = StateMotor::IDLE;
+    bool _pulseState = false;
     bool _dirState = DIR_UP;
 
-    // Timer used to send pulse while using moving function
-    // elapsedMicros _timerPulse = 0;
-    double _delayPulse = 10;
-    IntervalTimer stepTimer;
+    elapsedMicros _timerPulse = 0;
+    long _delayPulse = 5;
+
+    long _stepTravelled = 0;
+    double _mmPerStep = 0.00006515;
+
+    bool needPulse();
+    // Will drive the pulse down
+    void runPulse();
+
+    long _stepCount = 0;
+    long _stepToReach = 0;
+    bool isSendStepDone();
 };

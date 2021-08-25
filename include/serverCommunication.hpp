@@ -16,7 +16,7 @@ private:
     CttPress* _press;
 
     elapsedMillis _timeMetrics = 0;
-    unsigned long _samplingDelayMetrics = 1000;
+    unsigned long _samplingDelayMetrics = 100;
 
     // Get the length of the next package
     uint16_t getLengthPacket();
@@ -30,16 +30,6 @@ private:
     // sendMetrics will collect all the metrics, serialize them and send them over serial
     void sendMetrics();
 
-
-
-
-    // // To parse the incoming packet, deserialize the msgpack json
-    // void parsePacket(char* packet, int length);
-    // // To parse a parameter packet
-    // void parseParameter(char* arg);
-    // // To parse a command packet
-    // void parseCommand(ch)
-
-    // void parsePiston(char* arg);
-    // void parseWater(char* arg);
+    // printPacket takes a char array and send it to the serial port prepended by two bytes that tells its length
+    void printPacket(char* packet, uint16_t byteCount);
 };

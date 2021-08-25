@@ -1,7 +1,7 @@
 #pragma once
-#include "HX711.h"
+#include <HX711_ADC.h>
 
-#define POLL_DELAY 500
+
 
 class LoadCell {
 public:
@@ -9,14 +9,16 @@ public:
     ~LoadCell();
     void run();
     void tare();
-    long getWeight();
+    float getWeight();
     void setScalingFactor(long scalingFactor);
 
 private:
-    HX711 *_loadCell = nullptr;
-    double _scalingFactor = 0.01;
-    long _weight = 0;
+    HX711_ADC *_loadCell = nullptr;
+    float _scalingFactor = 6850;
+    float _weight = 0;
 
     long _lastTime = 0;
     uint8_t _isWaiting = 0;
+    bool _isTaring = false;
+    bool _newData = false;
 };
