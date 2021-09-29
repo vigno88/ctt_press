@@ -21,6 +21,8 @@
 #define pin_ssr1 3
 #define pin_ssr2 4
 
+// Limit switch
+#define pin_limit_switch 2 
 
 const uint16_t HEATER_DELAY = 2000;
 const uint16_t TEMP_DELAY = 500;
@@ -40,7 +42,7 @@ public:
     TemperatureController tcBottom = TemperatureController(&heatingPlateBottom, &thermoBottom);
     LoadCell loadCell = LoadCell();
     Motor motor = Motor(motorStep, motorDir, motorEnable);
-    MotorController controller = MotorController(&motor, &loadCell);
+    MotorController controller = MotorController(&motor, &loadCell, pin_limit_switch);
 
 };
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "ssr.hpp"
 #include "thermocouple.hpp"
-#include <PID_v1.h>
+#include "pid.hpp"
 
 class TemperatureController {
 public:

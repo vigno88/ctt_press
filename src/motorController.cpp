@@ -1,6 +1,6 @@
 #include "motorController.hpp"
 
-MotorController::MotorController(Motor* motor, LoadCell* loadcell){
+MotorController::MotorController(Motor* motor, LoadCell* loadcell,int pin_limit){
     _motor = motor;
     _loadCell = loadcell;
     _state = StateController::C_IDLE;
@@ -8,14 +8,17 @@ MotorController::MotorController(Motor* motor, LoadCell* loadcell){
     _goalPoint = 0;
     _currentPoint = _loadCell->getWeight();
     _output = 0;
-    _kp = 0;
-    _ki = 0;
-    _kd = 0;
+    _kp = 0.5;
+    _ki = 0.0;
+    _kd = 0.0;
     isRunning = false;
-    _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, P_ON_M, DIRECT);
+    _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, DIRECT);
     _pid->SetOutputLimits(-100,100);
     //turn the PID on
     _pid->SetMode(AUTOMATIC);
+    _pid->SetSampleTime(sampleTime);
+    pin_limit_switch = pin_limit;
+
 }
 
 void MotorController::setTo(double weight) {
@@ -26,72 +29,58 @@ void MotorController::setTo(double weight) {
 
 void MotorController::stop() {
     isRunning = false;
+    // if(_pid != nullptr) {
+    //     delete _pid;
+    // }
+    // _pid = nullptr;
 }
 
 void MotorController::start() {
     isRunning = true;
+     if(_pid != nullptr) {
+        delete _pid;
+    }
+    _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, DIRECT);
+    _pid->SetOutputLimits(-100,100);
+    //turn the PID on
+    _pid->SetMode(AUTOMATIC);
+    _pid->SetSampleTime(sampleTime);
 }
 void MotorController::run() {
+    // if(_motor->_state != StateMotor::MOVING_DOWN) {
+        // _motor->run();
+    // } else 
+    if(_motor->_state == StateMotor::MOVING_DOWN && (_loadCell->getWeight() < maxLoad) ||
+       _motor->_state == StateMotor::IDLE ||
+       _motor->_state == StateMotor::MOVING_UP && (digitalRead(pin_limit_switch) == LOW)) {
+        _motor->run();
+    } 
+    // else if(_motor->_state == StateMotor::MOVING_UP && (digitalRead(pin_limit_switch) == LOW)){
+        // _motor->run();
+    // }
     if(isRunning) {
          // Get the current weight on load cell
         _currentPoint = _loadCell->getWeight();
         if(_currentPoint < 0) {
             _currentPoint = 0;
         }
-        _pid->Compute();
-
-        // // Get the current weight on load cell
-        // float currentWeight = _loadCell->getWeight();
-        // if(currentWeight < 0) {
-        //     currentWeight = 0;
-        // }
-
-        // Compute the new delay
-        // double delta = goalWeight - currentWeight;
-        // double delta = _goalPoint - _currentPoint;
-        // if(_state != StateController::IS_IN_RANGE) {
-        //     if(delta <= 0.01 && delta >= -0.01){
-        //         _state = StateController::IS_IN_RANGE;
-        //     } else if(delta > 0.01){
-        //         // Add weight until in range
-        //         // currentDelay = getDelay(delta);
-        //         currentDelay = getDelay();
-        //         _state = StateController::GOING_DOWN;   
-        //     } else if(delta < -0.01) {
-        //         // Remove weight until in range
-        //         // currentDelay = getDelay(delta);
-        //         currentDelay = getDelay();
-        //         _state = StateController::GOING_UP;
-        //     }
-        // } else{
-        //     // If the weight is in range but it cross a threshold, start ajusting again
-        //     if(delta > 0.1) {
-        //         // Add weight
-        //         // currentDelay = getDelay(delta);
-        //         currentDelay = getDelay();
-        //         _state = StateController::GOING_DOWN;    
-        //     } else if(delta < -0.1) {
-        //         // currentDelay = getDelay(delta);
-        //         currentDelay = getDelay();
-        //         _state = StateController::GOING_UP;   
-        //     }
-        // }
-
-
-        if(_output == 0) {
+        if(_currentPoint == _goalPoint) {
             _state = StateController::IS_IN_RANGE;
-        } else if (_output < 0) {
-            _state = StateController::GOING_UP;
-        } else {
+        } else if(_currentPoint <= _goalPoint) {
             _state = StateController::GOING_DOWN;
+            // _pid->SetControllerDirection(DIRECT);
+        } else if (_currentPoint > _goalPoint) {
+            _state = StateController::GOING_UP;
+            // _pid->SetControllerDirection(REVERSE);
         }
+        _pid->Compute();
         currentDelay = getDelay();
 
         if(timerPulse >= currentDelay && _state != StateController::IS_IN_RANGE) {
-            if(_state == StateController::GOING_DOWN) {
+            if(_state == StateController::GOING_DOWN  && _currentPoint < maxLoad) {
                 _motor->sendSingleStepDown();
                 timerPulse = 0;
-            } else if(_state == StateController::GOING_UP) {
+            } else if(_state == StateController::GOING_UP && digitalRead(pin_limit_switch) == LOW) {
                 _motor->sendSingleStepUp();
                 timerPulse = 0;
             }
@@ -99,21 +88,9 @@ void MotorController::run() {
     }
 }
 
-// long MotorController::getDelay(float delta) {
-//     // Normalized
-//     float norm = 1-(abs(delta)/goalWeight);
-//     long delay = (long)(1/(10-(10*norm)) * minimumDelayMicros * durabilityConstant);
-//     if (delay < minimumDelayMicros) {
-//         return minimumDelayMicros;
-//     } else {
-//         return delay;
-//     }
-// }
-
 long MotorController::getDelay() {
-    // The delay for the controller is (1 second/(pidOut * stepMultiplier)) -> sec/step
-    // 1 seconds is 1000 ms
-    return 1000.0/(_output*_stepMultiplier);
+    // The delay for the controller is (1 sec/(pidOut * stepMultiplier)) -> ms/step
+    return 1000.0/(abs(_output)*_stepMultiplier);
 }
 
 void MotorController::setKp(double k) {
@@ -133,12 +110,30 @@ void MotorController::setKd(double k) {
 
 void MotorController::setSampleTime(int t) {
     _pid->SetSampleTime(t);
+    sampleTime = t;
 }
 
-void MotorController::setStepMultiplier(int m) {
+void MotorController::setStepMultiplier(double m) {
     _stepMultiplier = m;
 }
 // void MotorController::setDurabilityConstant(double c) {
 //     // c is normalized over 1 and we need our durability constant to be "normalized" over 10
 //     durabilityConstant = c*10;
 // }
+
+void MotorController::MoveDown() {
+    if( _loadCell->getWeight() < maxLoad)
+        _motor->MoveDown();
+}
+void MotorController::MoveDownSlow() {
+    if( _loadCell->getWeight() < maxLoad)
+        _motor->MoveDownSlow();
+}
+void MotorController::MoveUp() {
+    if(digitalRead(pin_limit_switch) == LOW)
+        _motor->MoveUp();
+}
+void MotorController::MoveUpSlow(){
+    if(digitalRead(pin_limit_switch) == LOW)
+        _motor->MoveUpSlow();
+}

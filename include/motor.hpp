@@ -36,6 +36,9 @@ public:
     void sendStepDown(long x);
     void sendSingleStepDown();
     void sendSingleStepUp();
+
+    long delaySlow = 150;
+    StateMotor _state = StateMotor::IDLE;
 private:
     uint8_t _stepPin = 0;
     uint8_t _dirPin = 0;
@@ -43,7 +46,7 @@ private:
 
     // speedMovement is the number of step/second
     uint16_t _speedMovement = 200;
-    StateMotor _state = StateMotor::IDLE;
+    // StateMotor _state = StateMotor::IDLE;
     bool _pulseState = false;
     bool _dirState = DIR_UP;
 
@@ -60,4 +63,7 @@ private:
     long _stepCount = 0;
     long _stepToReach = 0;
     bool isSendStepDone();
+
+    long _currentTime = 0;
+    long _lastTime = 0;
 };

@@ -10,21 +10,30 @@ TemperatureController::TemperatureController(SSR* ssr, Thermocouple* t) {
     _ki = 0;
     _kd = 0;
     _isRunning = false;
-    _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, P_ON_M, DIRECT);
+    _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, DIRECT);
     //turn the PID on
     _pid->SetMode(AUTOMATIC);
 }
 
 
 void TemperatureController::print() {
-    Serial.printf("Goal: %f, current: %f, output: %f, kp: %f, ki: %f, kd:%f\n", _goalPoint, _currentPoint, _output, _kp, _ki, _kd);
+    // Serial.printf("Goal: %f, current: %f, output: %f, kp: %f, ki: %f, kd:%f\n", _goalPoint, _currentPoint, _output, _kp, _ki, _kd);
 
 }
 TemperatureController::~TemperatureController() {
-    delete _pid;
+    if(_pid != nullptr) {
+        delete _pid;
+    }
+    _pid = nullptr;
 }
 
 void TemperatureController::start() {
+    if(_pid != nullptr) {
+        delete _pid;
+    }
+     _pid = new PID(&_currentPoint, &_output, &_goalPoint,_kp, _ki, _kd, DIRECT);
+    //turn the PID on
+    _pid->SetMode(AUTOMATIC);
     _isRunning = true;
 }
 
@@ -32,6 +41,7 @@ void TemperatureController::stop() {
     _isRunning = false;
     _goalPoint = 15;
     _ssr->setIntensity(0);
+    // delete _pid;
 }
 
 void TemperatureController::setGoal(double g) {

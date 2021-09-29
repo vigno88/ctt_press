@@ -24,6 +24,7 @@ void Motor::run() {
         sendOneStep();
         _timerPulse = 0;
     }
+    _currentTime = millis();
 }
 
 void Motor::sendStepDown(long x) {
@@ -56,50 +57,54 @@ bool Motor::isSendStepDone() {
 }
 
 void Motor::MoveUp() {
-    if(_state == StateMotor::IDLE) {
+    if(_state == StateMotor::IDLE && (_currentTime - _lastTime) > 100) {
         // Set the direction
-        Serial.println("Move up");
+        // Serial.println("Move up");
         digitalWrite(_dirPin, DIR_UP);
         _state = StateMotor::MOVING_UP;
         _timerPulse = 0;
         _delayPulse = 5;
+        _lastTime = millis();
     }
 }
 void Motor::MoveUpSlow() {
-    if(_state == StateMotor::IDLE) {
+    if(_state == StateMotor::IDLE && (_currentTime - _lastTime) > 100) {
         // Set the direction
-        Serial.println("Move up");
+        // Serial.println("Move up");
         digitalWrite(_dirPin, DIR_UP);
         _state = StateMotor::MOVING_UP;
         _timerPulse = 0;
-        _delayPulse = 75;
+        _delayPulse = delaySlow;
+        _lastTime = millis();
     }
 }
 
 void Motor::MoveDown() {
-    if(_state == StateMotor::IDLE) {
+    if(_state == StateMotor::IDLE && (_currentTime - _lastTime) > 100) {
         // Set the direction
-        Serial.println("Move down");
+        // Serial.println("Move down");
         digitalWrite(_dirPin, DIR_DOWN);
         _state = StateMotor::MOVING_DOWN;
         _timerPulse = 0;
         _delayPulse = 5;
+        _lastTime = millis();
     }
 }
 
 void Motor::MoveDownSlow() {
-    if(_state == StateMotor::IDLE) {
+    if(_state == StateMotor::IDLE && (_currentTime - _lastTime) > 100) {
         // Set the direction
-        Serial.println("Move down");
+        // Serial.println("Move down");
         digitalWrite(_dirPin, DIR_DOWN);
         _state = StateMotor::MOVING_DOWN;
         _timerPulse = 0;
-        _delayPulse = 75;
+        _delayPulse = delaySlow;
+        _lastTime = millis();
     }
 }
 
 void Motor::StopMove() {
-    Serial.println("Stop move");
+    // Serial.println("Stop move");
     _state = StateMotor::IDLE;
 }
 

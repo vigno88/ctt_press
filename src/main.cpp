@@ -9,6 +9,7 @@ int main() {
   pinMode(motorEnable, OUTPUT);
   pinMode(pin_ssr1, OUTPUT);
   pinMode(pin_ssr2, OUTPUT);
+  pinMode(pin_limit_switch, INPUT);
 
   Serial.begin(115200);
   Serial1.begin(115200);

@@ -11,6 +11,8 @@ void ServerCommunication::run() {
     }
     if(_timeMetrics >= _samplingDelayMetrics) {
         sendMetrics();
+        Serial.printf("goal: %f, current: %f, output: %f\n", _press->controller._goalPoint,_press->controller._currentPoint, _press->controller._output);
+        // Serial.printf("kp: %f, ki: %f, kd: %f\n", _press->controller._kp,_press->controller._ki, _press->controller._kd);
         // _press->tcTop.print();
         _timeMetrics = 0;
     }
@@ -42,15 +44,19 @@ void ServerCommunication::processCommand(JsonDocument& doc) {
     // Motor Command
     if(strcmp(name, "motor") == 0) {
         if(strcmp(payload, "mD") == 0) {
-            _press->motor.MoveDown();  
+            _press->controller.MoveDown();
+            // _press->motor.MoveDown();  
         } else if(strcmp(payload, "mU") == 0) {
-            _press->motor.MoveUp();
+            _press->controller.MoveUp();
+            // _press->motor.MoveUp();
         } else if(strcmp(payload, "mS") == 0) {
             _press->motor.StopMove();
         } else if(strcmp(payload, "mDs") == 0) {
-            _press->motor.MoveDownSlow(); 
+            _press->controller.MoveDownSlow();
+            // _press->motor.MoveDownSlow(); 
         } else if(strcmp(payload, "mUs") == 0) {
-            _press->motor.MoveUpSlow();
+            _press->controller.MoveUpSlow();
+            // _press->motor.MoveUpSlow();
         }
     } else if(strcmp(name, "distance") == 0) {
         if(strcmp(payload, "tare") == 0) {
@@ -89,7 +95,6 @@ void ServerCommunication::processsParameter(JsonDocument& doc) {
     JsonObject o = doc["ps"].as<JsonArray>()[0];
     for (JsonPair kv : o) {
         const char* key = kv.key().c_str();
-        Serial.printf("%s: %f\n", key,kv.value().as<double>());
         double v = kv.value().as<double>();
         if(strcmp(key, "pTop") == 0) {
             _press->tcTop.setKp(v);
@@ -107,6 +112,20 @@ void ServerCommunication::processsParameter(JsonDocument& doc) {
             // _press->controller.setDurabilityConstant(v);
         } else if(strcmp(key, "lcF") == 0) {
             _press->loadCell.setScalingFactor(v);
+        } else if(strcmp(key, "pM") == 0) {
+            _press->controller.setKp(v);
+        } else if(strcmp(key, "iM") == 0) {
+            _press->controller.setKi(v);
+        } else if(strcmp(key, "dM") == 0) {
+            _press->controller.setKd(v);
+        } else if(strcmp(key, "sMu") == 0) {
+            _press->controller.setStepMultiplier(v);
+        } else if(strcmp(key, "pidST") == 0) {
+            _press->controller.setSampleTime((int)v);
+        } else if(strcmp(key, "mL") == 0) {
+            _press->controller.maxLoad = (int) v;
+        } else if(strcmp(key, "dS") == 0) {
+            _press->motor.delaySlow = (int) v;
         }
     }
 }

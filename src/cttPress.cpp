@@ -26,7 +26,6 @@ void CttPress::run() {
     tcBottom.run();
 
     loadCell.run();
-    motor.run();
     controller.run();
 }
 
